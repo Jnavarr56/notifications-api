@@ -8,24 +8,25 @@ import aqp from 'api-query-params'
 import cors from 'cors'
 import { Notification } from './db/models'
 import { checkForRequiredVars } from './utils/vars'
-// import authentication from './middleware/authentication'
+import authentication from './middleware/authentication'
 
 require('dotenv').config()
 
 checkForRequiredVars([
-	'PORT',
-	'DB_URL',
-	'NOTIFICATIONS_API',
-	// 'AUTHENTICATION_API'
+	'PORT', 
+	'DB_URL', 
+	'GATEWAY_BASE_URL', 
+	'NOTIFICATIONS_API', 
+	'AUTHENTICATION_API'
 ])
 
-const { 
-	// GATEWAY_BASE_URL, 
+const { 	
 	CORS, 
 	PORT, 
 	DB_URL, 
+	GATEWAY_BASE_URL, 
 	NOTIFICATIONS_API, 
-	// AUTHENTICATION_API 
+	AUTHENTICATION_API
 } = process.env
 
 
@@ -37,7 +38,7 @@ app
 	.use(bodyParser.json())
 	.use(cookieParser())
 	.use(bearerToken())
-	// .use(authentication(GATEWAY_BASE_URL + AUTHENTICATION_API + '/authorize'))
+	.use(authentication(`${GATEWAY_BASE_URL}${AUTHENTICATION_API}/authorize`))
 	.use(morgan('dev'))
 
 app.get(NOTIFICATIONS_API, (req, res) => {
@@ -56,9 +57,9 @@ app.get(NOTIFICATIONS_API, (req, res) => {
 })
 
 app.get(`${NOTIFICATIONS_API}/:notification_id`, (req, res) => {
-	Notification.findById(req.params.user_id, (error, user) => {
+	Notification.findById(req.params.notification_id, (error, notification) => {
 		if (error) return res.status(500).send({ error })
-		res.send({ user })
+		res.send({ notification })
 	})
 })
 
